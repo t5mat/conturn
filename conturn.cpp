@@ -502,7 +502,6 @@ private:
 struct ConVar
 {
     char name[CON_VAR_MAX_COUNT];
-    char cvar_line_pattern[CON_VAR_MAX_COUNT];
 
     char value[CON_VAR_MAX_COUNT];
     union {
@@ -513,7 +512,7 @@ struct ConVar
     ConVar(const char *name_)
     {
         std::snprintf(name, std::size(name), "%s", name_);
-        std::snprintf(cvar_line_pattern, std::size(cvar_line_pattern), R"("%s" = ")", name_);
+        std::snprintf(pattern, std::size(pattern), R"("%s" = ")", name_);
     }
 
     void parse_double()
@@ -525,6 +524,30 @@ struct ConVar
     {
         bool_value = std::atof(value);
     }
+
+    bool parse_con_cvar_line(const char *line)
+    {
+        auto start = line;
+        for (; pattern[start - line] != '\0'; ++start) {
+            if (*start != pattern[start - line]) {
+                return false;
+            }
+        }
+
+        for (size_t i = 0; start[i] != '\0'; ++i) {
+            if (start[i] == '"') {
+                auto count = std::min(std::size(value), i + 1);
+                std::strncpy(value, start, count - 1);
+                value[count - 1] = L'\0';
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+private:
+    char pattern[CON_VAR_MAX_COUNT];
 };
 
 enum class Command
@@ -858,17 +881,11 @@ private:
 setinfo %s "%s"
 setinfo %s "%s"
 setinfo %s "%s"
-setinfo %s "%s"
-setinfo %s "0"
-setinfo %s "0"
-setinfo %s "0")",
+setinfo %s "%s")",
                 freq->name, freq->value,
                 sleep->name, sleep->value,
                 yawspeed->name, yawspeed->value,
-                anglespeedkey->name, anglespeedkey->value,
-                in_left->name,
-                in_right->name,
-                in_speed->name);
+                anglespeedkey->name, anglespeedkey->value);
         }
 
         char text[CFG_MAX_COUNT];
@@ -877,20 +894,17 @@ setinfo %s "%s"
 setinfo %s "%s"
 
 alias %s "con_logfile :; con_logfile; con_filter_enable 0; con_filter_enable"
-alias +%s "%s 1; %s"
-alias -%s "%s 0; %s"
-alias +%s "%s 1; %s"
-alias -%s "%s 0; %s"
-alias +%s "+speed; %s 1; %s"
-alias -%s "-speed; %s 0; %s"%s%s
+alias +%s "toggle +_left=;"
+alias -%s "toggle -_left=;"
+alias +%s "toggle +_right=;"
+alias -%s "toggle -_right=;"
+alias +%s "toggle +_speed=;"
+alias -%s "toggle -_speed=;"%s%s
 
 con_logfile %S
-con_filter_text_out " = "
+con_filter_text_out "= "
 con_filter_enable 1
 
-%s
-%s
-%s
 %s
 %s
 %s
@@ -909,12 +923,12 @@ con_filter_enable
             url->name, url->value,
 
             off_alias_name,
-            left_alias_name, in_left->name, in_left->name,
-            left_alias_name, in_left->name, in_left->name,
-            right_alias_name, in_right->name, in_right->name,
-            right_alias_name, in_right->name, in_right->name,
-            speed_alias_name, in_speed->name, in_speed->name,
-            speed_alias_name, in_speed->name, in_speed->name,
+            left_alias_name,
+            left_alias_name,
+            right_alias_name,
+            right_alias_name,
+            speed_alias_name,
+            speed_alias_name,
 
             (first_run ? "\n\n": ""), (first_run ? first_run_setinfos : ""),
 
@@ -927,10 +941,7 @@ con_filter_enable
             yawspeed->name,
             anglespeedkey->name,
             sensitivity->name,
-            yaw->name,
-            in_left->name,
-            in_right->name,
-            in_speed->name);
+            yaw->name);
 
         HANDLE file = CreateFileW(cfg_path, GENERIC_WRITE, 0, nullptr, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, nullptr);
         DWORD written;
@@ -956,23 +967,35 @@ con_filter_enable
 
     static void handle_con_line(const char *line)
     {
-        if (parse_con_cvar_line(line, in_left->cvar_line_pattern, in_left->value)) {
+        if (0 == std::strcmp(line, R"(+_left= is not a valid cvar)")) {
+            std::strcpy(in_left->value, "1");
             in_left->parse_bool();
-        } else if (parse_con_cvar_line(line, in_right->cvar_line_pattern, in_right->value)) {
+        } else if (0 == std::strcmp(line, R"(+_right= is not a valid cvar)")) {
+            std::strcpy(in_right->value, "1");
             in_right->parse_bool();
-        } else if (parse_con_cvar_line(line, in_speed->cvar_line_pattern, in_speed->value)) {
+        } else if (0 == std::strcmp(line, R"(+_speed= is not a valid cvar)")) {
+            std::strcpy(in_speed->value, "1");
             in_speed->parse_bool();
-        } else if (parse_con_cvar_line(line, yawspeed->cvar_line_pattern, yawspeed->value)) {
+        } else if (0 == std::strcmp(line, R"(-_left= is not a valid cvar)")) {
+            std::strcpy(in_left->value, "0");
+            in_left->parse_bool();
+        } else if (0 == std::strcmp(line, R"(-_right= is not a valid cvar)")) {
+            std::strcpy(in_right->value, "0");
+            in_right->parse_bool();
+        } else if (0 == std::strcmp(line, R"(-_speed= is not a valid cvar)")) {
+            std::strcpy(in_speed->value, "0");
+            in_speed->parse_bool();
+        } else if (yawspeed->parse_con_cvar_line(line)) {
             yawspeed->parse_double();
-        } else if (parse_con_cvar_line(line, anglespeedkey->cvar_line_pattern, anglespeedkey->value)) {
+        } else if (anglespeedkey->parse_con_cvar_line(line)) {
             anglespeedkey->parse_double();
-        } else if (parse_con_cvar_line(line, sensitivity->cvar_line_pattern, sensitivity->value)) {
+        } else if (sensitivity->parse_con_cvar_line(line)) {
             sensitivity->parse_double();
-        } else if (parse_con_cvar_line(line, yaw->cvar_line_pattern, yaw->value)) {
+        } else if (yaw->parse_con_cvar_line(line)) {
             yaw->parse_double();
-        } else if (parse_con_cvar_line(line, freq->cvar_line_pattern, freq->value)) {
+        } else if (freq->parse_con_cvar_line(line)) {
             freq->parse_double();
-        } else if (parse_con_cvar_line(line, sleep->cvar_line_pattern, sleep->value)) {
+        } else if (sleep->parse_con_cvar_line(line)) {
             sleep->parse_double();
         } else if (0 == std::strncmp(line, R"("con_logfile" = ")", std::size(R"("con_logfile" = ")") - 1)) {
             create_cfg_file(false);
@@ -980,27 +1003,6 @@ con_filter_enable
             create_cfg_file(true);
             ini_write_con_vars();
         }
-    }
-
-    static bool parse_con_cvar_line(const char *line, const char *pattern, char (&value)[CON_VAR_MAX_COUNT])
-    {
-        auto start = line;
-        for (; pattern[start - line] != '\0'; ++start) {
-            if (*start != pattern[start - line]) {
-                return false;
-            }
-        }
-
-        for (size_t i = 0; start[i] != '\0'; ++i) {
-            if (start[i] == '"') {
-                auto count = std::min(std::size(value), i + 1);
-                std::strncpy(value, start, count - 1);
-                value[count - 1] = L'\0';
-                return true;
-            }
-        }
-
-        return false;
     }
 
     inline static wchar_t image_path[PATHCCH_MAX_CCH];
