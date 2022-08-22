@@ -110,7 +110,7 @@ _cl_anglespeedkey 3.0; _cl_anglespeedkey
 
 ## How it works
 
-*Game console output is read through a named pipe.* The command `con_logfile` can be used to write console output to a file. There are no checks on the path before opening it, so a symlink can be used instead of a file. conturn creates a symlink to a named pipe through which it receives the console output. Named pipes writes are fast, also due to the fact that there's no disk I/O (it's worth noting that the game flushes the file after every console message, which means using `con_logfile` with an actual file is not great for FPS).
+*Game console output is read through a named pipe.* The command `con_logfile` can be used to write console output to a file. There are no checks on the path before opening it, so a symlink can be used instead of a file. conturn creates a symlink to a named pipe through which it receives the console output. Named pipes writes are fast, also due to the fact that there's no disk I/O (it's worth noting that the game flushes the file after every console message, which means using `con_logfile` with an actual file is not great for performance).
 
 `exec conturn` will:
 
