@@ -345,11 +345,11 @@ private:
     bool last_in_right;
 };
 
-struct FocusMonitor
+struct ForegroundMonitor
 {
-    FocusMonitor(const wchar_t *target_path_)
+    ForegroundMonitor(const wchar_t *target_path_)
     {
-        SetWinEventHook(EVENT_OBJECT_FOCUS, EVENT_OBJECT_FOCUS, nullptr, proc, 0, 0, WINEVENT_OUTOFCONTEXT);
+        SetWinEventHook(EVENT_SYSTEM_FOREGROUND, EVENT_SYSTEM_FOREGROUND, nullptr, proc, 0, 0, WINEVENT_OUTOFCONTEXT);
         GetWindowThreadProcessId(GetForegroundWindow(), &pid_);
     }
 
@@ -609,7 +609,7 @@ struct App
         create_cfg_file(true);
 
         MouseMoveCalculator mouse_move_calculator;
-        FocusMonitor focus_monitor(game_path);
+        ForegroundMonitor foreground_monitor(game_path);
         CursorMonitor cursor_monitor;
         HWND hwnd = win32::create_window(version_info.name, version_info.name, window_proc);
         CtrlSignalHandler ctrl_signal_handler(hwnd);
@@ -669,7 +669,7 @@ struct App
             }
 
             auto last_active = active;
-            active = !cursor_monitor.cursor() && con_log_pipe->connected() && focus_monitor.pid() == con_log_pipe->client_pid();
+            active = !cursor_monitor.cursor() && con_log_pipe->connected() && foreground_monitor.pid() == con_log_pipe->client_pid();
             active = active && freq->double_value >= 0.0 && (sleep->double_value == -1.0 || (sleep->double_value >= 0.0 && sleep->double_value < 0.5)) && sensitivity->double_value != 0.0 && yaw->double_value != 0.0;
             if (!active) {
                 continue;
