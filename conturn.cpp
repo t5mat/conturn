@@ -956,7 +956,6 @@ con_filter_enable
 
     static void create_con_log_file()
     {
-        DeleteFileW(con_log_path);
         CreateSymbolicLinkW(con_log_path, pipe_path, 0);
     }
 
