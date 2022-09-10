@@ -39,7 +39,7 @@ Once conturn is running and attached to the game, the following new convars/comm
 
 - `+_left` - bind this instead of `+left`
 - `+_right` - bind this instead of `+right`
-- `+_speed` - bind this instead of `+speed`
+- `+_speed` - bind this instead of `+speed` (or with, **but keep in mind `+speed` scales down airaccelerate**)
 - `_cl_yawspeed` (default 90.0) - turning speed for `+_left/+_right`
 - `_cl_anglespeedkey` (default 0.33) - factor by which `_cl_yawspeed` is scaled while in `+_speed`
 
