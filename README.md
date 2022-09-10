@@ -45,6 +45,15 @@ Once conturn is running and attached to the game, the following new convars/comm
 - `_cl_yawspeed` (default 90.0) - turning speed for `+_left/+_right`
 - `_cl_anglespeedkey` (default 0.33) - factor by which `_cl_yawspeed` is scaled while in `+_speed`
 
+<details>
+<summary>Advanced</summary>
+
+- `conturn_off` - turn off conturn
+- `conturn_freq` (default 0.001) *(notify after changing)* - maximum frequency of simulated mouse moves; lower values decrease CPU usage in favor of turn smoothness
+- `conturn_sleep` (default 0.0000005) *(notify after changing)* - main loop sleep duration; higher values decrease input polling rate and overall CPU usage
+
+</details>
+
 ### Changing convars
 
 The values of `_cl_yawspeed`, `_cl_anglespeedkey`, `sensitivity`, `m_yaw` are used to calculate the speed by which the program moves the mouse cursor.
@@ -103,13 +112,6 @@ _cl_anglespeedkey 3.0; _cl_anglespeedkey
 
 </details>
 
-### Additional convars/commands
-
-- `conturn_off` - turn off conturn
-- `conturn_freq` (default 0.001) *(notify after changing)* - maximum frequency of simulated mouse moves, lower values decrease CPU usage in favor of turn smoothness
-- `conturn_sleep` (default 0.0000005) *(notify after changing)* - main loop sleep duration, higher values decrease input polling rate and overall CPU usage
-- *Console filtering* - conturn uses console filtering (`con_filter_enable`, `con_filter_text_out`) to filter the in-game console spam it creates
-
 ## How it works
 
 *Game console output is read through a named pipe.* The command `con_logfile` can be used to write console output to a file. There are no checks on the path before opening it, so a symlink can be used instead of a file. conturn creates a symlink to a named pipe through which it receives the console output. Named pipes writes are fast, also due to the fact that there's no disk I/O (it's worth noting that the game flushes the file after every console message, which means using `con_logfile` with an actual file is not great for performance).
@@ -129,7 +131,8 @@ Relevant console commands:
 - `setinfo` - create a new convar (`FCVAR_USERINFO`)
 - `alias` - print all aliases
 - `cvarlist <name>` - print convar info
-- `key_listboundkeys` - list bound keys (turn off console filtering! `con_filter_enable 0`)
+- `key_listboundkeys` - list bound keys
+- *Console filtering* - the program uses console filtering (`con_filter_enable`, `con_filter_text_out`) to filter the in-game console spam it creates
 
 ### conturn vs. turnbinds
 
