@@ -603,8 +603,8 @@ struct App
         init_con_vars();
         ini_read_con_vars();
 
-        delete_con_log_file();
         delete_cfg_file();
+        delete_con_log_file();
         create_con_log_file();
         create_cfg_file(true);
 
@@ -687,8 +687,8 @@ struct App
 
         tray_icon.reset();
 
-        delete_con_log_file();
         delete_cfg_file();
+        delete_con_log_file();
 
         ini_write_con_vars();
 
