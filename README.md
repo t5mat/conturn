@@ -21,6 +21,8 @@ New convars/commands `+_left`, `+_right`, `+_speed`, `_cl_yawspeed`, `_cl_angles
 
 Settings are stored in `<exe-name>.ini`.
 
+To use with multiple games, copy `conturn.exe` to different names (`conturn-csgo.exe`, `conturn-cstrike.exe`...) so that different settings files are used.
+
 The program will run as Administrator in order to be able to create symlinks.
 
 **2. Select your `csgo.exe`**
