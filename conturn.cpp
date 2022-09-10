@@ -642,6 +642,15 @@ struct App
             }
         }
 
+        switch (steam_appid) {
+        case 240:
+            std::wcscpy(game_name, L"cstrike");
+            break;
+        case 730:
+            std::wcscpy(game_name, L"csgo");
+            break;
+        }
+
         std::wcscpy(cfg_path, game_path);
         PathCchRemoveFileSpec(cfg_path, std::size(cfg_path));
         switch (steam_appid) {
@@ -749,9 +758,9 @@ struct App
 
                     wchar_t buffer[128];
                     if (connected) {
-                        std::swprintf(buffer, std::size(buffer), L"%s (attached: PID %d)", version_info.title, con_log_pipe->client_pid());
+                        std::swprintf(buffer, std::size(buffer), L"%s (%s) [attached: PID %d]", version_info.title, game_name, con_log_pipe->client_pid());
                     } else {
-                        std::swprintf(buffer, std::size(buffer), L"%s (not attached)", version_info.title);
+                        std::swprintf(buffer, std::size(buffer), L"%s (%s) [not attached]", version_info.title, game_name);
                     }
                     tray_icon->set_tip(buffer);
                 }
@@ -847,7 +856,8 @@ private:
 
         AppendMenuW(menu, MF_SEPARATOR, 0, nullptr);
 
-        AppendMenuW(menu, MF_STRING, *Command::OPEN_GAME_FOLDER, L"Open game folder...");
+        std::swprintf(buffer, std::size(buffer), L"Open game folder (%s)...", game_name);
+        AppendMenuW(menu, MF_STRING, *Command::OPEN_GAME_FOLDER, buffer);
 
         std::swprintf(buffer, std::size(buffer), L"Open %s folder...", version_info.title);
         AppendMenuW(menu, MF_STRING, *Command::OPEN_FOLDER, buffer);
@@ -1108,6 +1118,7 @@ con_filter_enable
     inline static wchar_t ini_path[PATHCCH_MAX_CCH];
     inline static wchar_t game_path[PATHCCH_MAX_CCH];
     inline static int steam_appid;
+    inline static wchar_t game_name[PATHCCH_MAX_CCH];
     inline static wchar_t cfg_path[PATHCCH_MAX_CCH];
     inline static wchar_t con_log_path[PATHCCH_MAX_CCH];
     inline static char off_alias_name[CON_VAR_MAX_COUNT];
