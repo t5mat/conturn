@@ -618,26 +618,45 @@ struct App
         SetPriorityClass(GetCurrentProcess(), HIGH_PRIORITY_CLASS);
         win32::set_timer_resolution(1);
 
+        HANDLE game_process = nullptr;
         std::optional<bool> last_connected;
         bool active = false;
 
         do {
-            bool handle_window = false;
-            bool handle_con_log_pipe = false;
+            bool handle_window = active;
+            bool handle_con_log_pipe = active;
+            bool handle_game_process = false;
+
             if (!active) {
-                HANDLE handles[] = {con_log_pipe->event()};
-                auto result = MsgWaitForMultipleObjects(std::size(handles), handles, false, INFINITE, QS_ALLINPUT);
-                switch (result) {
-                case WAIT_OBJECT_0 + 0:
-                    handle_con_log_pipe = true;
-                    break;
-                case WAIT_OBJECT_0 + 1:
-                    handle_window = true;
-                    break;
+                if (!game_process) {
+                    HANDLE handles[] = {con_log_pipe->event()};
+                    auto result = MsgWaitForMultipleObjects(std::size(handles), handles, false, INFINITE, QS_ALLINPUT);
+                    switch (result) {
+                    case WAIT_OBJECT_0 + 0:
+                        handle_con_log_pipe = true;
+                        break;
+                    case WAIT_OBJECT_0 + 1:
+                        handle_window = true;
+                        break;
+                    }
+                } else {
+                    HANDLE handles[] = {con_log_pipe->event(), game_process};
+                    auto result = MsgWaitForMultipleObjects(std::size(handles), handles, false, INFINITE, QS_ALLINPUT);
+                    switch (result) {
+                    case WAIT_OBJECT_0 + 0:
+                        handle_con_log_pipe = true;
+                        break;
+                    case WAIT_OBJECT_0 + 1:
+                        handle_game_process = true;
+                        break;
+                    case WAIT_OBJECT_0 + 2:
+                        handle_window = true;
+                        break;
+                    }
                 }
             }
 
-            if (active || handle_window) {
+            if (handle_window) {
             peek:
                 MSG msg;
                 if (PeekMessageW(&msg, hwnd, 0, 0, PM_REMOVE)) {
@@ -649,16 +668,20 @@ struct App
                 }
             }
 
-            if (active || handle_con_log_pipe) {
+            if (handle_con_log_pipe) {
                 char line[CON_LINE_MAX_COUNT];
                 while (con_log_pipe->get_next_line(line)) {
                     handle_con_line(line);
                 }
 
                 bool connected = con_log_pipe->connected();
-                if (!last_connected || last_connected != connected) {
+                if (!last_connected || *last_connected != connected) {
+                    if (connected && !game_process) {
+                        game_process = OpenProcess(SYNCHRONIZE, false, con_log_pipe->client_pid());
+                    }
+
                     wchar_t buffer[128];
-                    if (con_log_pipe->connected()) {
+                    if (connected) {
                         std::swprintf(buffer, std::size(buffer), L"%s (attached: PID %d)", version_info.title, con_log_pipe->client_pid());
                     } else {
                         std::swprintf(buffer, std::size(buffer), L"%s (not attached)", version_info.title);
@@ -666,6 +689,14 @@ struct App
                     tray_icon->set_tip(buffer);
                 }
                 last_connected = connected;
+            }
+
+            if (handle_game_process) {
+                CloseHandle(game_process);
+                game_process = nullptr;
+
+                create_cfg_file(true);
+                ini_write_con_vars();
             }
 
             auto last_active = active;
@@ -998,9 +1029,6 @@ con_filter_enable
             sleep->parse_double();
         } else if (0 == std::strncmp(line, R"("con_logfile" = ")", std::size(R"("con_logfile" = ")") - 1)) {
             create_cfg_file(false);
-        } else if (0 == std::strncmp(line, R"(Host_Shutdown)", std::size(R"(Host_Shutdown)") - 1)) {
-            create_cfg_file(true);
-            ini_write_con_vars();
         }
     }
 
