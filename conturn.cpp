@@ -550,6 +550,33 @@ private:
     char pattern[CON_VAR_MAX_COUNT];
 };
 
+int find_game_steam_appid(const wchar_t *game_path)
+{
+    wchar_t steam_appid_path[PATHCCH_MAX_CCH];
+    std::wcscpy(steam_appid_path, game_path);
+    PathCchRemoveFileSpec(steam_appid_path, std::size(steam_appid_path));
+    PathCchAppend(steam_appid_path, std::size(steam_appid_path), LR"(steam_appid.txt)");
+
+    char text[32];
+
+    HANDLE file = CreateFileW(steam_appid_path, GENERIC_READ, 0, nullptr, OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, nullptr);
+    if (!file) {
+        return 0;
+    }
+
+    DWORD read;
+    if (!ReadFile(file, text, (std::size(text) - 1) * sizeof(*text), &read, nullptr)) {
+        CloseHandle(file);
+        return 0;
+    }
+
+    CloseHandle(file);
+
+    text[read] = '\0';
+
+    return std::atoi(text);
+}
+
 enum class Command
 {
     ABOUT,
@@ -582,21 +609,61 @@ struct App
         PathCchRenameExtension(ini_path, std::size(ini_path), LR"(ini)");
 
         GetPrivateProfileStringW(version_info.name, L"GamePath", L"", game_path, std::size(game_path), ini_path);
-        if (INVALID_FILE_ATTRIBUTES == GetFileAttributesW(game_path)) {
+
+        steam_appid = 0;
+
+        if (INVALID_FILE_ATTRIBUTES != GetFileAttributesW(game_path)) {
+            steam_appid = find_game_steam_appid(game_path);
+            switch (steam_appid) {
+            case 240:
+            case 730:
+                break;
+            default:
+                steam_appid = 0;
+                break;
+            }
+        }
+
+        if (!steam_appid) {
             if (!show_game_path_dialog(game_path)) {
                 return;
             }
+
             WritePrivateProfileStringW(version_info.name, L"GamePath", game_path, ini_path);
+
+            steam_appid = find_game_steam_appid(game_path);
+            switch (steam_appid) {
+            case 240:
+            case 730:
+                break;
+            default:
+                MessageBoxW(nullptr, L"Unsupported game.", version_info.title, MB_OK | MB_ICONERROR);
+                return;
+            }
         }
 
         std::wcscpy(cfg_path, game_path);
         PathCchRemoveFileSpec(cfg_path, std::size(cfg_path));
-        PathCchAppend(cfg_path, std::size(cfg_path), LR"(csgo\cfg)");
+        switch (steam_appid) {
+        case 240:
+            PathCchAppend(cfg_path, std::size(cfg_path), LR"(cstrike\cfg)");
+            break;
+        case 730:
+            PathCchAppend(cfg_path, std::size(cfg_path), LR"(csgo\cfg)");
+            break;
+        }
         PathCchAppend(cfg_path, std::size(cfg_path), cfg_filename);
 
         std::wcscpy(con_log_path, game_path);
         PathCchRemoveFileSpec(con_log_path, std::size(con_log_path));
-        PathCchAppend(con_log_path, std::size(con_log_path),LR"(csgo)");
+        switch (steam_appid) {
+        case 240:
+            PathCchAppend(con_log_path, std::size(con_log_path), LR"(cstrike)");
+            break;
+        case 730:
+            PathCchAppend(con_log_path, std::size(con_log_path), LR"(csgo)");
+            break;
+        }
         PathCchAppend(con_log_path, std::size(con_log_path), con_log_filename);
 
         create_con_vars();
@@ -798,14 +865,14 @@ private:
         info.lStructSize = sizeof(OPENFILENAMEW);
         info.hwndOwner = nullptr;
         info.hInstance = nullptr;
-        info.lpstrFilter = L"csgo.exe\0csgo.exe\0";
+        info.lpstrFilter = L"Game .exe file (csgo.exe/hl2.exe)\0csgo.exe;hl2.exe\0All Files (*.*)\0*.*\0";
         info.lpstrCustomFilter = nullptr;
         info.nFilterIndex = 0;
         info.lpstrFile = path;
         info.nMaxFile = std::size(path);
         info.lpstrFileTitle = nullptr;
         info.lpstrInitialDir = nullptr;
-        info.lpstrTitle = L"Select your csgo.exe";
+        info.lpstrTitle = L"Select your game .exe file";
         info.Flags = OFN_DONTADDTORECENT | OFN_FILEMUSTEXIST | OFN_HIDEREADONLY;
         info.nFileOffset = 0;
         info.nFileExtension = 0;
@@ -1040,6 +1107,7 @@ con_filter_enable
     inline static std::optional<ConLogPipe> con_log_pipe;
     inline static wchar_t ini_path[PATHCCH_MAX_CCH];
     inline static wchar_t game_path[PATHCCH_MAX_CCH];
+    inline static int steam_appid;
     inline static wchar_t cfg_path[PATHCCH_MAX_CCH];
     inline static wchar_t con_log_path[PATHCCH_MAX_CCH];
     inline static char off_alias_name[CON_VAR_MAX_COUNT];

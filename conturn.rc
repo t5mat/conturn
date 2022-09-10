@@ -8,7 +8,7 @@ BEGIN
     BEGIN
         BLOCK "040904E4"
         BEGIN
-            VALUE "FileDescription", "conturn for CS:GO"
+            VALUE "FileDescription", "conturn (+left/+right)"
             VALUE "FileVersion", "1.0.1"
             VALUE "InternalName", "conturn"
             VALUE "LegalCopyright", "https://github.com/t5mat/conturn"
