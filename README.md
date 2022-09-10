@@ -108,7 +108,7 @@ _cl_anglespeedkey 3.0; _cl_anglespeedkey
 - `conturn_off` - turn off conturn
 - `conturn_freq` (default 0.001) *(notify after changing)* - maximum frequency of simulated mouse moves, lower values decrease CPU usage in favor of turn smoothness
 - `conturn_sleep` (default 0.0000005) *(notify after changing)* - main loop sleep duration, higher values decrease input polling rate and overall CPU usage
-- *Console filtering* - conturn uses console filtering (`con_filter_enable`, `con_filter_text_out`) to filter the in-game console spam created by the convar prints. This prevents commands like `key_listboundkeys` from printing any output - you can use `con_filter_enable 0` to turn filtering off.
+- *Console filtering* - conturn uses console filtering (`con_filter_enable`, `con_filter_text_out`) to filter the in-game console spam it creates
 
 ## How it works
 

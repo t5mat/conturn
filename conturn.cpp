@@ -894,15 +894,15 @@ setinfo %s "%s"
 setinfo %s "%s"
 
 alias %s "con_logfile :; con_logfile; con_filter_enable 0; con_filter_enable"
-alias +%s "toggle +_left=;"
-alias -%s "toggle -_left=;"
-alias +%s "toggle +_right=;"
-alias -%s "toggle -_right=;"
-alias +%s "toggle +_speed=;"
-alias -%s "toggle -_speed=;"%s%s
+alias +%s "toggle +_left_conturn;"
+alias -%s "toggle -_left_conturn;"
+alias +%s "toggle +_right_conturn;"
+alias -%s "toggle -_right_conturn;"
+alias +%s "toggle +_speed_conturn;"
+alias -%s "toggle -_speed_conturn;"%s%s
 
 con_logfile %S
-con_filter_text_out "= "
+con_filter_text_out "_conturn is not a valid cvar"
 con_filter_enable 1
 
 %s
@@ -967,22 +967,22 @@ con_filter_enable
 
     static void handle_con_line(const char *line)
     {
-        if (0 == std::strcmp(line, R"(+_left= is not a valid cvar)")) {
+        if (0 == std::strcmp(line, R"(+_left_conturn is not a valid cvar)")) {
             std::strcpy(in_left->value, "1");
             in_left->parse_bool();
-        } else if (0 == std::strcmp(line, R"(+_right= is not a valid cvar)")) {
+        } else if (0 == std::strcmp(line, R"(+_right_conturn is not a valid cvar)")) {
             std::strcpy(in_right->value, "1");
             in_right->parse_bool();
-        } else if (0 == std::strcmp(line, R"(+_speed= is not a valid cvar)")) {
+        } else if (0 == std::strcmp(line, R"(+_speed_conturn is not a valid cvar)")) {
             std::strcpy(in_speed->value, "1");
             in_speed->parse_bool();
-        } else if (0 == std::strcmp(line, R"(-_left= is not a valid cvar)")) {
+        } else if (0 == std::strcmp(line, R"(-_left_conturn is not a valid cvar)")) {
             std::strcpy(in_left->value, "0");
             in_left->parse_bool();
-        } else if (0 == std::strcmp(line, R"(-_right= is not a valid cvar)")) {
+        } else if (0 == std::strcmp(line, R"(-_right_conturn is not a valid cvar)")) {
             std::strcpy(in_right->value, "0");
             in_right->parse_bool();
-        } else if (0 == std::strcmp(line, R"(-_speed= is not a valid cvar)")) {
+        } else if (0 == std::strcmp(line, R"(-_speed_conturn is not a valid cvar)")) {
             std::strcpy(in_speed->value, "0");
             in_speed->parse_bool();
         } else if (yawspeed->parse_con_cvar_line(line)) {
