@@ -1,5 +1,7 @@
 <h1>conturn <img src="https://user-images.githubusercontent.com/16616463/182421854-486f911c-257c-403a-b9f1-423046c19243.png" width="24" height="23"></h1>
 
+<img src="https://user-images.githubusercontent.com/16616463/189576722-b477cc64-5437-44ab-b690-ee99e613e7ef.png">
+
 conturn provides alternative `+left/+right/+speed` commands for CS:GO & CS:S with in-game `cl_yawspeed`, `cl_anglespeedkey` control.
 
 These convars, which control the turning speed for the `+left/+right` commands, exist in previous games in the series (1.6, Source), but are inaccessible in CS:GO, forcing useless unchangable defaults. This program aims to fill this gap, as these commands are essential for movement game modes like surf.
