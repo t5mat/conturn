@@ -1,6 +1,6 @@
 <h1>conturn <img src="https://user-images.githubusercontent.com/16616463/182421854-486f911c-257c-403a-b9f1-423046c19243.png" width="24" height="23"></h1>
 
-<img src="https://user-images.githubusercontent.com/16616463/189576722-b477cc64-5437-44ab-b690-ee99e613e7ef.png">
+<img src="https://user-images.githubusercontent.com/16616463/191477910-0131d418-6065-45d6-b72a-a668c89b0249.png">
 
 conturn provides alternative `+left/+right/+speed` commands for CS:GO & CS:S with in-game `cl_yawspeed`, `cl_anglespeedkey` control.
 
@@ -48,7 +48,7 @@ Once conturn is running and attached to the game, the following new convars/comm
 - `_cl_anglespeedkey` (default 0.33) - factor by which `_cl_yawspeed` is scaled while in `+_speed`
 
 <details>
-<summary>Advanced</summary>
+<summary>More</summary>
 
 - `conturn_off` - turn off conturn
 - `conturn_freq` (default 0.001) *(notify after changing)* - maximum frequency of simulated mouse moves; lower values decrease CPU usage in favor of turn smoothness
