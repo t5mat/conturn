@@ -273,7 +273,7 @@ struct ConLogPipe
     }
 
 private:
-    explicit ConLogPipe(HANDLE pipe_, HANDLE event)
+    ConLogPipe(HANDLE pipe_, HANDLE event)
     {
         pending = false;
         state = State::CONNECTING;
@@ -432,7 +432,7 @@ struct TrayIcon
 {
     using CreateMenu_t = HMENU (*)();
 
-    explicit TrayIcon(HWND hwnd, const wchar_t *tip, CreateMenu_t create_menu_)
+    TrayIcon(HWND hwnd, const wchar_t *tip, CreateMenu_t create_menu_)
     {
         data = {};
         data.uVersion = NOTIFYICON_VERSION_4;
@@ -687,7 +687,7 @@ struct App
         MouseMoveCalculator mouse_move_calculator;
         ForegroundMonitor foreground_monitor(game_path);
         CursorMonitor cursor_monitor;
-        HWND hwnd = win32::create_window(version_info.name, version_info.name, window_proc);
+        auto hwnd = win32::create_window(version_info.name, version_info.name, window_proc);
         CtrlSignalHandler ctrl_signal_handler(hwnd);
         tray_icon.emplace(hwnd, version_info.title, create_tray_menu);
 
