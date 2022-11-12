@@ -14,7 +14,7 @@ add_executable(conturn
     "${CMAKE_CURRENT_LIST_DIR}/conturn.cpp"
 )
 
-target_compile_options(conturn PRIVATE -std=c++20 -Wall -Werror -Wno-switch -Wno-string-plus-int)
+target_compile_options(conturn PRIVATE -std=c++2b -Wall -Werror -Wno-switch -Wno-string-plus-int)
 
 target_link_libraries(conturn PRIVATE
     -static

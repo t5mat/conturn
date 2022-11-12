@@ -8,12 +8,6 @@
 
 namespace common {
 
-template<typename T>
-constexpr std::enable_if_t<std::is_enum<T>::value, std::underlying_type_t<T>> operator*(T v)
-{
-    return std::underlying_type_t<T>(v);
-}
-
 namespace win32 {
 
 namespace {
@@ -843,7 +837,7 @@ private:
         auto menu = CreatePopupMenu();
 
         std::swprintf(buffer, std::size(buffer), L"%s %s", version_info.title, version_info.version);
-        AppendMenuW(menu, MF_STRING, *Command::ABOUT, buffer);
+        AppendMenuW(menu, MF_STRING, std::to_underlying(Command::ABOUT), buffer);
 
         AppendMenuW(menu, MF_SEPARATOR, 0, nullptr);
 
@@ -857,14 +851,14 @@ private:
         AppendMenuW(menu, MF_SEPARATOR, 0, nullptr);
 
         std::swprintf(buffer, std::size(buffer), L"Open game folder (%s)...", game_name);
-        AppendMenuW(menu, MF_STRING, *Command::OPEN_GAME_FOLDER, buffer);
+        AppendMenuW(menu, MF_STRING, std::to_underlying(Command::OPEN_GAME_FOLDER), buffer);
 
         std::swprintf(buffer, std::size(buffer), L"Open %s folder...", version_info.title);
-        AppendMenuW(menu, MF_STRING, *Command::OPEN_FOLDER, buffer);
+        AppendMenuW(menu, MF_STRING, std::to_underlying(Command::OPEN_FOLDER), buffer);
 
         AppendMenuW(menu, MF_SEPARATOR, 0, nullptr);
 
-        AppendMenuW(menu, MF_STRING, *Command::EXIT, L"Exit");
+        AppendMenuW(menu, MF_STRING, std::to_underlying(Command::EXIT), L"Exit");
 
         return menu;
     }
