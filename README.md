@@ -4,7 +4,7 @@
 
 conturn provides alternative `+left/+right/+speed` commands for CS:GO & CS:S with in-game `cl_yawspeed`, `cl_anglespeedkey` control.
 
-These convars, which control the turning speed for the `+left/+right` commands, exist in previous games in the series (1.6, Source), but are inaccessible in CS:GO, forcing useless unchangable defaults. This program aims to fill this gap, as these commands are essential for movement game modes like surf.
+These convars, which control the turning speed for the `+left/+right` commands, exist in previous games in the series (1.6, CS:S), but are inaccessible in CS:GO, forcing useless unchangable defaults (`cl_yawspeed 210`, `cl_anglespeedkey 0.67`). This program aims to fill this gap, as these commands are essential for movement game modes like surf.
 
 conturn works by simulating mouse movement based on the game's console output, captured using `con_logfile`.
 
@@ -12,20 +12,20 @@ New convars/commands `+_left`, `+_right`, `+_speed`, `_cl_yawspeed`, `_cl_angles
 
 - [Installation](#installation)
 - [Usage](#usage)
-- [How it works](#how-it-works)
-  - [conturn vs. turnbinds](#conturn-vs-turnbinds)
 - [Anti-cheat software](#anti-cheat-software)
+- [conturn vs. turnbinds](#conturn-vs-turnbinds)
+- [How it works](#how-it-works)
 - [Building](#building)
 
 ## Installation
 
 **1. [Download](https://github.com/t5mat/conturn/releases/latest/download/conturn.exe) and run `conturn.exe`**
 
+The program will run as Administrator in order to be able to create symlinks.
+
 Settings are stored in `<exe-name>.ini`.
 
 To use with multiple games, copy `conturn.exe` to different names (`conturn-csgo.exe`, `conturn-cstrike.exe`...) so that different settings files are used.
-
-The program will run as Administrator in order to be able to create symlinks.
 
 **2. Select your game `.exe` file** (`csgo.exe`/`hl2.exe`)
 
@@ -114,6 +114,24 @@ _cl_anglespeedkey 3.0; _cl_anglespeedkey
 
 </details>
 
+## Anti-cheat software
+
+The program does not patch or inject anything into the game.
+
+Apart from simulating mouse input, it doesn't really do anything suspicious.
+
+It would be fair to say it's as VAC bannable as an AutoHotkey script.
+
+Anti-cheat software (FACEIT AC, ...) can easily detect the simulation of mouse movement though, and either prevent it or prevent the program from running completely. This is expected, just don't actively try to use this program in unintended scenarios.
+
+## conturn vs. turnbinds
+
+conturn provides some benefits over [turnbinds](https://github.com/t5mat/turnbinds):
+
+- **It uses in-game configuration** - you can use aliases, binds, and manage your configuration in (per-map) .cfg files
+- **It doesn't need to monitor input alongside the game** - conturn operates on the input captured by the game, which results in less CPU usage and better input consistency
+- **No need to `Alt+Tab`** - there's no UI, everything happens in-game
+
 ## How it works
 
 *Game console output is read through a named pipe.* The command `con_logfile` can be used to write console output to a file. There are no checks on the path before opening it, so a symlink can be used instead of a file. conturn creates a symlink to a named pipe through which it receives the console output. Named pipes writes are fast, also due to the fact that there's no disk I/O (it's worth noting that the game flushes the file after every console message, which means using `con_logfile` with an actual file is not great for performance).
@@ -135,24 +153,6 @@ Relevant console commands:
 - `cvarlist <name>` - print convar info
 - `key_listboundkeys` - list bound keys
 - *Console filtering* - the program uses console filtering (`con_filter_enable`, `con_filter_text_out`) to filter the in-game console spam it creates
-
-### conturn vs. turnbinds
-
-conturn provides some benefits over [turnbinds](https://github.com/t5mat/turnbinds/):
-
-- **It uses in-game configuration** - you can use aliases, binds, and manage your configuration in (per-map) .cfg files
-- **It doesn't need to monitor input alongside the game** - conturn operates on the input captured by the game through the console output, which results in less CPU usage and better input consistency
-- **No need to `Alt+Tab`** - there's no UI, everything happens in-game
-
-## Anti-cheat software
-
-The program does not patch or inject anything into the game.
-
-Apart from simulating mouse input, it doesn't really do anything suspicious.
-
-It would be fair to say it's as bannable as an AutoHotkey script.
-
-Anti-cheat software can easily detect the simulation of mouse movement though, and either prevent it or prevent the program from running completely. This is expected, just don't actively try to use this program in unintended scenarios.
 
 ## Building
 
